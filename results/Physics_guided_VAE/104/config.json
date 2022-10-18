@@ -1,0 +1,18 @@
+{
+    "model": "guided",
+    "device": "cpu",
+    "dataset": "simulation",
+    "epochs": 100,
+    "lr": 0.0001,
+    "batch_size": 64,
+    "z_eta_dim": 4,
+    "h_dim": 256,
+    "lambda_sam": 1,
+    "beta": 0.0001,
+    "lambda_classifier": 0.01,
+    "lambda_encoder": 0.01,
+    "lambda_entropy": 0.01,
+    "seed": 104,
+    "n_classes": 5,
+    "n_channels": 186
+}
