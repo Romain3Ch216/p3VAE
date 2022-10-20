@@ -1,6 +1,6 @@
 # p3VAE
 
-This repository contains code for the paper:
+This repository contains code for the following paper, under review in the International Journal of Computer Vision:
 
 R. Thoreau, L. Risser, V. Achard, B. Berthelot and X. Briottet, "p3VAE: a physics-integrated generative model. Application to the semantic segmentation of optical remote sensing images", 2022.
 
