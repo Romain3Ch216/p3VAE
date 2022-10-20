@@ -41,7 +41,6 @@ Please send any feedback to romain.thoreau@onera.fr
   keywords = {Computer Vision and Pattern Recognition (cs.CV), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences, I.2.6; I.2.10, 68T45},
   title = {p$^3$VAE: a physics-integrated generative model. Application to the semantic segmentation of optical remote sensing images},
   publisher = {arXiv},
-  year = {2022},
-  copyright = {arXiv.org perpetual, non-exclusive license}
+  year = {2022}
 }
 ```
