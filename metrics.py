@@ -330,7 +330,7 @@ if __name__ == "__main__":
 			pred_q.extend(pred)
 
 			try:
-				Lr, pred, z_pred_phi, z_pred_eta, logits, z_std = model.argmax_q_z_x_batch(spectra, config)
+				Lr, pred, z_pred_phi, z_pred_eta, logits, z_std = model.argmax_p_y_x_batch(spectra, config)
 				codes_ = torch.cat((pred.unsqueeze(1), z_pred_phi.unsqueeze(1), z_pred_eta), dim=-1)
 				pred_p.extend(pred.numpy())
 				# z_std_.extend(z_std.numpy())

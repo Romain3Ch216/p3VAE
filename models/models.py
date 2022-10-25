@@ -196,7 +196,7 @@ class SemiSupervisedVAE(Model):
         self.logs['val']['Entropy'].append(H.item())
         return y_true, y_pred
 
-    def argmax_q_z_x_batch(self, batch, config, num_samples=5):
+    def argmax_p_y_x_batch(self, batch, config, num_samples=5):
         self.train()
         batch = batch.to(config['device'])
         L = torch.zeros((batch.shape[0], self.y_dim))
