@@ -84,8 +84,7 @@ try:
                                 lambda_encoder=config['lambda_encoder'],
                                 lambda_classifier=config['lambda_classifier'],
                                 lambda_sam=config['lambda_sam'],
-                                beta=config['beta'],
-                                target_entropy=config['target_entropy'])
+                                beta=config['beta'])
 
             
             if config['model'] in ['p3VAE', 'guided', 'gaussian', 'p3VAE_no_gs']:
