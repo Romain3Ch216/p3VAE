@@ -420,7 +420,15 @@ class MCConsistentDropoutModule(torch.nn.Module):
         self.parent_module = module
         self.y_dim = module.y_dim
         _patch_dropout_layers(self.parent_module)
-        self.forward = self.parent_module.forward
 
-    def regularization(self, norm):
+    def regularization(self, norm="L2"):
         return self.parent_module.regularization(norm)
+
+    def forward(self, x, num_samples=10, reduction=True):
+        self.train()
+        y = torch.zeros((x.shape[0], self.y_dim, num_samples)).to(x.device)
+        for _ in range(num_samples):
+            y[:, :, _] = self.parent_module(x)
+        if reduction:
+            y = torch.mean(y, dim=-1)
+        return y

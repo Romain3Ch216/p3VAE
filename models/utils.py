@@ -1,4 +1,5 @@
 # Copyright (c) 2022 ONERA, Magellium and IMT, Romain Thoreau, Laurent Risser, Véronique Achard, Béatrice Berthelot, Xavier Briottet.
+import pdb
 
 import torch
 import torch.nn as nn
@@ -6,75 +7,10 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 from torch.nn import init
 import numpy as np 
+from sklearn.metrics import accuracy_score, f1_score
+from typing import Union
+from itertools import cycle
 
-
-class HyperspectralWrapper(nn.Module):
-    """
-    Converts a dict of CNNs (one for each continous spectral domain)
-    into a single CNN.
-    """
-    def __init__(self, models, flatten=True, conv_dropout=False):
-        super(HyperspectralWrapper, self).__init__()
-        self.models = nn.ModuleDict(models)
-        self.flatten = flatten
-        self.conv_dropout = conv_dropout 
-
-    @property
-    def out_channels(self):
-        with torch.no_grad():
-            n_channels = sum([model.n_channels for model in self.models.values()])
-            x = torch.ones((2, n_channels))
-            x = self.forward(x)
-        return x.numel()//2
-
-    def forward(self, x):
-        if len(x.shape)>2:
-            patch_size = x.shape[-1]
-            x = x[:,0,:,patch_size//2, patch_size//2]
-        z, B = {}, 0
-
-        for model_id, model in self.models.items():
-            z[model_id] = model(x[:, B:B+model.n_channels])
-            B += model.n_channels
-
-        keys = list(z.keys())
-        if self.conv_dropout:
-            dropout = torch.ones(len(keys))
-            dropout[np.random.randint(len(z))] = 0
-            out = torch.cat([z[keys[i]]*dropout[i] for i in range(len(z))], dim=-1)
-        else:
-            out = torch.cat([z[keys[i]] for i in range(len(z))], dim=-1)
-        
-        if self.flatten:
-            out = out.view(out.shape[0], -1)
-        return out
-
-
-class SpectralConvolution(nn.Module):
-    """
-    Two layers of spectral convolutions with a max pool operation.
-    """
-    def __init__(self, hyperparams):
-        super(SpectralConvolution, self).__init__()
-        [n_channels, n_planes1, n_planes2, kernel_size1, kernel_size2, pool_size] = hyperparams
-
-        self.n_channels = n_channels
-        self.conv1 = nn.Conv1d(1, n_planes1, kernel_size1, padding='same', padding_mode='replicate')
-        self.conv2 = nn.Conv1d(n_planes1, n_planes2, kernel_size2, padding='same', padding_mode='replicate')
-        self.pool = nn.MaxPool1d(pool_size)
-
-    def forward(self, x):
-        x_ = x.unsqueeze(1)
-        x_ = F.relu(self.conv1(x_))
-        x_ = F.relu(self.conv2(x_))
-        x_ = x_ + x.unsqueeze(1)
-        x_ = F.relu(x_)
-        x_ = self.pool(x_)
-        return x_
-
-class View(torch.nn.Module):
-    def forward(self, x):
-        return x.squeeze(-1).squeeze(-1)
 
 def sam_(x, y, reduction='mean'):
     """
@@ -111,7 +47,7 @@ def Lr_(u, v, alpha=1, weights=None):
         mse = F.mse_loss(u, v, reduction='none')
         mse = torch.mean(mse, dim=-1)*weights
         sam = sam_(u, v, reduction='none')*weights
-    return mse + alpha*sam
+    return mse + sam
 
 def one_hot(y, y_dim):
     """
@@ -146,3 +82,87 @@ def enumerate_discrete(x, y_dim):
         generated = generated.cuda()
 
     return Variable(generated.float())
+
+def accuracy_metrics(y_true, y_pred) -> Union[float, float]:
+    if isinstance(y_true, torch.Tensor):
+        y_true = y_true.cpu().numpy()
+    if isinstance(y_pred, torch.Tensor):
+        y_pred = y_pred.cpu().numpy()
+    acc = accuracy_score(y_true, y_pred)
+    f1score = f1_score(y_true, y_pred, average='micro')
+    return acc, f1score
+
+def cycle_loader(labeled_data, unlabeled_data):
+    return zip(cycle(labeled_data), unlabeled_data)
+
+class View(torch.nn.Module):
+    def forward(self, x):
+        return x.squeeze(-1).squeeze(-1)
+
+def NormalNLLLoss(x, mu, var):
+    """
+    Calculate the negative log likelihood
+    of normal distribution.
+    This needs to be minimised.
+
+    Treating Q(cj | x) as a factored Gaussian.
+    """
+    logli = -0.5 * (var.mul(2 * np.pi) + 1e-6).log() - (x - mu).pow(2).div(var.mul(2.0) + 1e-6)
+    nll = -(logli.sum(1).mean())
+    return nll
+
+def ceil_int(x: float) -> int:
+    """
+    Floor function.
+
+    :param x: a float
+    :return: the floor of the input
+    """
+    return int(np.ceil(x))
+
+
+def _compute_number_of_patches(patch_size: int, image_size: int, overlapping: int) -> int:
+    """
+    Computes the minimum number of patches to cover a bigger image
+    given the patch size and the overlapping between patches.
+
+    :param patch_size: size of the patch
+    :param image_size: size of the image
+    :param overlapping: length of the overlapping
+    :return: number of patches
+    """
+    return ceil_int(image_size * 1.0 / (patch_size - overlapping))
+
+
+def _compute_float_overlapping(patch_size: int, image_size: int, n: int) -> float:
+    """
+        Computes the maximum overlapping between patches to cover a bigger image.
+
+        :param patch_size: size of the patch
+        :param image_size: size of the image
+        :param n: number of patches
+        :return: the overlapping
+    """
+    if n == 1:
+        return 0
+    else:
+        return (patch_size * n - image_size) * 1.0 / (n - 1.0)
+
+
+def patch_data_loader_from_image(image, patch_size):
+        image_size = image.shape[0]
+        assert image_size == image.shape[1], "Image should be a square"
+        n_patches = _compute_number_of_patches(patch_size, image_size, overlapping=0)
+        overlapping = _compute_float_overlapping(patch_size, image_size, n_patches)
+        for i in range(n_patches):
+            for j in range(n_patches):
+                top = int(i * (patch_size - overlapping))
+                left = int(j * (patch_size - overlapping))
+                yield image[top: top + patch_size, left: left + patch_size], top, left
+
+
+def data_loader_from_image(image, batch_size):
+    image = image.view(-1, image.shape[-1])
+    data = torch.utils.data.TensorDataset(image)
+    loader = torch.utils.data.DataLoader(data, batch_size=batch_size, shuffle=False)
+    return loader

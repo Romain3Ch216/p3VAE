@@ -4,16 +4,6 @@
 # Part of the following code is under the following license:
 # Copyright 2018 Ubisoft La Forge Authors.  All rights reserved.
 import numpy as np
-import math
-
-from numpy.core.numeric import NaN
-from sklearn import linear_model
-from sklearn.preprocessing import minmax_scale
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.linear_model import Lasso
-from sklearn.metrics import mean_squared_error
-from sklearn.model_selection import cross_val_score
-from sklearn.preprocessing import minmax_scale
 from pyitlib import discrete_random_variable as drv
 from sklearn.preprocessing import minmax_scale
 
@@ -70,12 +60,11 @@ def jemmig(factors, codes, continuous_factors=True, nb_bins=10):
 
     # compute the mean gap for all factors
     sum_gap = 0
-    jemmig_scores = []
+    jemmig_scores = []; je = []; gap = []
     for f in range(nb_factors):
         mi_f = np.sort(mi_matrix[f, :])
-        je_idx = np.argsort(mi_matrix[f, :])[-1]
-
-        # Compute unormalized JEMMIG
+        je_idx = np.argsort(mi_matrix[f, :])[-1]; je.append(je_matrix[f, je_idx])
+        gap.append(mi_f[-1] - mi_f[-2])
         jemmig_not_normalized = je_matrix[f, je_idx] - mi_f[-1] + mi_f[-2]
 
         # normalize by H(f) + log(#bins)
@@ -87,7 +76,7 @@ def jemmig(factors, codes, continuous_factors=True, nb_bins=10):
     # compute the mean gap
     jemmig_score = sum_gap / nb_factors
     
-    return jemmig_score, jemmig_scores
+    return jemmig_score, jemmig_scores, je, gap
 
 def get_bin_index(x, nb_bins):
     ''' Discretize input variable
@@ -106,17 +95,13 @@ def get_bin_index(x, nb_bins):
 import torch   
 import torch.nn.functional as F 
 from models.utils import sam_, one_hot
-from data import spectra_bbm, load_dataset
-from models import * 
-from utils import * 
-from models.models import load_model
+from data import SimulatedDataSet
+from models.model_loader import load_model
 from sklearn.metrics import f1_score, confusion_matrix, classification_report
 import json  
 import matplotlib.pyplot as plt 
-import os 
-import sys 
-import pdb 
-import math 
+import sys
+import math
 
 
 def build_data_under_diff_irradiance(dataset, class_id):
@@ -182,7 +167,7 @@ def plot_z_true_vs_z_pred(z_true, z_pred, confusion, z_std, class_id, fontsize=2
 	plt.legend(loc=4, prop={'size': 20})
 	# plt.show()
 	# pdb.set_trace()
-	plt.savefig('./results/{}/Figures/cos_{}.pdf'.format(config['model'], class_id), dpi=200, bbox_inches='tight', pad_inches=0.05)
+	plt.savefig('./results/simulation/{}/Figures/cos_{}.pdf'.format(config['model'], class_id), dpi=200, bbox_inches='tight', pad_inches=0.05)
 
 def plot_omega_true_vs_omega_pred(omega_true, z_pred, confusion, fontsize=20, colors = ['#F2A65A', '#909CC2', '#89A7A7', '#6320EE', '#E94974']):
 	x=np.linspace(0,1,100)
@@ -295,25 +280,27 @@ if __name__ == "__main__":
 		with open(results_path + '/config.json') as f:
 			config = json.load(f)
 
-		dataset = load_dataset(config)
+		config['device'] = 'cpu'
+		dataset = SimulatedDataSet()
 		target_names = [dataset.classes[i]['label'] for i in range(len(dataset.classes))][1:] 
 		E_dir = torch.from_numpy(dataset.E_dir)
 		E_dif = torch.from_numpy(dataset.E_dif)
 		theta = torch.tensor([dataset.theta])
 		
-		model, _, _ = load_model(dataset, config)
-		checkpoint = torch.load(results_path + '/best_model.pth.tar')
+		model = load_model(dataset, config)
+		checkpoint = torch.load(results_path + '/best_model.pth.tar', map_location=torch.device('cpu'))
 		model.load_state_dict(checkpoint['state_dict'])
 
 		pred_q, pred_p, labels = [], [], []
 		factors, codes = [], []
 		entropy, z_std_ = [], []
 		report = {}
-		report['jemmig_score'] = {}
+		report['jemmig_score'] = {}; report['gap'] = {}; report['je'] = {}
 		report['avg_f1_score_p'] = 0 
 		report['avg_f1_score_q'] = 0 
 
-		for true_class_id in range(1, model.classifier.y_dim+1):
+
+		for true_class_id in range(1, model.n_classes+1):
 			report[true_class_id] = {}
 			report[true_class_id]['confusions'] = {}
 
@@ -321,36 +308,42 @@ if __name__ == "__main__":
 			labels_, z_true, omega_true, alpha, eta = torch.split(factors_, 1, dim=1)
 			labels.extend(labels_.long().numpy().reshape(-1))
 
-			try:
-				pred = model.classifier.predict(spectra)
-			except:
-				pred = model.predict(spectra)
-
-			pred = torch.argmax(pred, dim=-1).numpy()
-			pred_q.extend(pred)
-
-			try:
-				Lr, pred, z_pred_phi, z_pred_eta, logits, z_std = model.argmax_p_y_x_batch(spectra, config)
-				codes_ = torch.cat((pred.unsqueeze(1), z_pred_phi.unsqueeze(1), z_pred_eta), dim=-1)
-				pred_p.extend(pred.numpy())
-				# z_std_.extend(z_std.numpy())
-				# logits = torch.softmax(logits, dim=-1)
-				# H = -torch.sum(torch.mul(logits, torch.log(logits + 1e-8)), dim=-1)
-				# entropy.extend(H.numpy())
-
+			if config['model'] == 'ssInfoGAN':
+				with torch.no_grad():
+					real_features, _ = model.netD(spectra)
+					logits = model.netQss(real_features)
+					pred = torch.argmax(logits, dim=-1)
+					z_mu, z_var = model.netQus(real_features)
+				z = z_mu + torch.randn(z_var.shape)*z_var**0.5
+				codes_ = torch.cat((pred.unsqueeze(1), z), dim=-1)
 				write_confusions(pred, true_class_id, report)
-				plot_z_true_vs_z_pred(z_true.squeeze(1), z_pred_phi, confusion, z_std, true_class_id)
+				pred_p.extend(pred.numpy())
+				pred_q.extend(pred.numpy())
+				factors.append(factors_)
+				codes.append(codes_)
+
+			elif config['model'] in ['gaussian', 'guided', 'p3VAE', 'guided_no_gs', 'p3VAE_no_gs']:
+				Lr, pred, z_P_std, random_z_P, random_z_A = model.argmax_p_y_x_batch(spectra, config)
+				codes_ = torch.cat((pred.unsqueeze(1), random_z_P.unsqueeze(1), random_z_A), dim=-1)
+				write_confusions(pred, true_class_id, report)
+				pred_p.extend(pred.numpy())
+				confusion = (pred == true_class_id-1).long()
+				plot_z_true_vs_z_pred(z_true.squeeze(1), random_z_P, confusion, z_P_std, true_class_id)
+
+				with torch.no_grad():
+					logits = model.q_y_x_batch(spectra)
+				pred = torch.argmax(logits, dim=-1)
+				pred_q.extend(pred.numpy())
 
 				factors.append(factors_)
 				codes.append(codes_)
-				# plot_irradiance(z_true.squeeze(1), omega_true.squeeze(1), confusion)
-				# plot_confusions(dataset, model, spectra, confusion, z_pred_phi, z_pred_eta, z_true, omega_true, logits)
-			except:
-				pred_p.extend(pred)
-				pass 
 
-		# plot_entropy_std(entropy, z_std_)
-		# pdb.set_trace()
+			elif config['model'] in ['CNN', 'CNN_full_annotations']:
+				logits = model(spectra)
+				pred = torch.argmax(logits, dim=-1)
+				pred_q.extend(pred.cpu().numpy())
+				pred_p.extend(pred.cpu().numpy())
+
 
 		labels = np.array(labels)-1
 		pred_q = np.array(pred_q)
@@ -359,33 +352,34 @@ if __name__ == "__main__":
 		f1_score_q = f1_score(labels, pred_q, average=None)
 		f1_score_p = f1_score(labels, pred_p, average=None)
 
-		for class_id in range(1, model.classifier.y_dim+1):
+		for class_id in range(1, model.n_classes+1):
 			report[class_id]['f1_score_q'] = f1_score_q[class_id-1]
 			report[class_id]['f1_score_p'] = f1_score_p[class_id-1]
 			report['avg_f1_score_q'] += f1_score_q[class_id-1]/len(f1_score_q)
 			report['avg_f1_score_p'] += f1_score_p[class_id-1]/len(f1_score_p)
 
-		if config['model'] in ['clf', 'clf_all']:
+		if config['model'] in ['CNN', 'CNN_full_annotations']:
 			global_report.append(report)
-		else: 
+		else:
 			factors = torch.cat(factors, dim=0).numpy()
 			codes = torch.cat(codes, dim=0).numpy()
 
-			jemmig_score, jemmig_scores = jemmig(factors, codes, nb_bins=20)
-			dci_score = dci(factors, codes)
+			jemmig_score, jemmig_scores, je, gap = jemmig(factors, codes, nb_bins=20)
+
 
 			for i in range(len(jemmig_scores)):
-				report['jemmig_score'][i] = jemmig_scores[i]
+				report['jemmig_score'][i] = jemmig_scores[i]; report['gap'][i] = gap[i]; report['je'][i] = je[i]
 
 			report['jemmig_score']['avg_jemmig_score'] = jemmig_score
-			report['disentanglement'] = dci_score[0]
-			report['completeness'] = dci_score[1]
-			report['informativeness'] = dci_score[2]
+			report['gap']['avg_gap'] = sum(gap) / len(gap)
+			report['je']['avg_je'] = sum(je) / len(je)
+
+			print('Gap: ', gap)
 
 			global_report.append(report)
 
 	avg_report = {}
-	avg_report['jemmig_score'] = {}
+	avg_report['jemmig_score'] = {}; avg_report['je'] = {}; avg_report['gap'] = {}
 	for class_id in range(1, len(f1_score_q)+1):
 		avg_report[class_id] = {}
 		for metric in report[class_id]:
@@ -393,25 +387,29 @@ if __name__ == "__main__":
 
 	try:
 		for i in range(len(jemmig_scores)):
-			avg_report['jemmig_score'][i] = 0
+			avg_report['jemmig_score'][i] = 0; avg_report['je'][i] = 0; avg_report['gap'][i] = 0
 	except:
 		pass
 
 	avg_report['jemmig_score']['avg_jemmig_score'] = 0
+	avg_report['gap']['avg_gap'] = 0
+	avg_report['je']['avg_je'] = 0
 	avg_report['avg_f1_score_q'] = 0 
 	avg_report['avg_f1_score_p'] = 0
-	avg_report['disentanglement'] = 0
-	avg_report['completeness'] = 0
-	avg_report['informativeness'] = 0
 	avg_report['f1_score_p'] = []; avg_report['f1_score_q'] = []
 
 	for report in global_report:
 		for key in report:
-			if key in ['avg_f1_score_q', 'avg_f1_score_p', 'disentanglement', 'completeness', 'informativeness']:
+			if key in ['avg_f1_score_q', 'avg_f1_score_p']:
 				avg_report[key] += report[key]/len(global_report)
-			elif key == 'jemmig_score':
+			elif key in ['jemmig_score', 'je', 'gap']:
 				try:
-					avg_report[key]['avg_jemmig_score'] += report[key]['avg_jemmig_score']/len(global_report)
+					if key == 'jemmig_score':
+						avg_report[key]['avg_jemmig_score'] += report[key]['avg_jemmig_score']/len(global_report)
+					elif key == 'gap':
+						avg_report[key]['avg_gap'] += report[key]['avg_gap']/len(global_report)
+					elif key == 'je':
+						avg_report[key]['avg_je'] += report[key]['avg_je']/len(global_report)
 					for i in range(len(jemmig_scores)):
 						avg_report[key][i] += report[key][i]/len(global_report)
 				except:
@@ -424,6 +422,5 @@ if __name__ == "__main__":
 						avg_report[key][metric] += report[key][metric]/len(global_report)
 		avg_report['f1_score_p'].append(report['avg_f1_score_p']) ; avg_report['f1_score_q'].append(report['avg_f1_score_q'])
 
-    
-	with open('./results/{}/classification_report.json'.format(config['model']), 'w') as f:
+	with open('./results/simulation/{}/classification_report.json'.format(config['model']), 'w') as f:
 		json.dump(avg_report, f, indent=4)
