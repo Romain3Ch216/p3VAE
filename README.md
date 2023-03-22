@@ -27,6 +27,12 @@ For instance, to reproduce the figure 7 of section 5 for the p3VAE with seed 103
 
 The figure will be saved in the './results/p3VAE/Figures` folder.
 
+## Loading real data
+
+The airborne hyperspectral images acquired during the CAMCATT-AI4GEO experiment in Toulouse, France are publicly available here: https://camcatt.sedoo.fr/
+
+To load and save image patches, use an instance of the `GeoDataset` class in the `data.py` file.
+
 ## Feedback
 
 Please send any feedback to romain.thoreau@onera.fr
