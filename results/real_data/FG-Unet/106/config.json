@@ -1,0 +1,21 @@
+{
+    "model": "FG-Unet",
+    "device": "cpu",
+    "dataset": "real_data",
+    "epochs": 500,
+    "lr": 0.005,
+    "batch_size": 16,
+    "z_eta_dim": 4,
+    "h_dim": 256,
+    "lambda_sam": 1,
+    "beta": 0.0001,
+    "lambda_classifier": 0.01,
+    "lambda_encoder": 0.01,
+    "lambda_entropy": 0.01,
+    "beta_g": null,
+    "d_step": 5,
+    "seed": 106,
+    "n_classes": 8,
+    "n_channels": 310,
+    "noise_dim": 30
+}

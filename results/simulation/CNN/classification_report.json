@@ -1,0 +1,35 @@
+{
+    "jemmig_score": {
+        "avg_jemmig_score": 0
+    },
+    "1": {
+        "confusions": {},
+        "f1_score_q": 0.8991728838836042,
+        "f1_score_p": 0.8991728838836042
+    },
+    "2": {
+        "confusions": {},
+        "f1_score_q": 0.8135979815057941,
+        "f1_score_p": 0.8135979815057941
+    },
+    "3": {
+        "confusions": {},
+        "f1_score_q": 0.7666846617799208,
+        "f1_score_p": 0.7666846617799208
+    },
+    "4": {
+        "confusions": {},
+        "f1_score_q": 0.7876704391845603,
+        "f1_score_p": 0.7876704391845603
+    },
+    "5": {
+        "confusions": {},
+        "f1_score_q": 0.7514979666401059,
+        "f1_score_p": 0.7514979666401059
+    },
+    "avg_f1_score_q": 0.8037247865987971,
+    "avg_f1_score_p": 0.8037247865987971,
+    "disentanglement": 0,
+    "completeness": 0,
+    "informativeness": 0
+}
