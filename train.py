@@ -121,7 +121,6 @@ if __name__ == "__main__":
     training_options.add_argument('--l1', type=float, default=0.25, help='For GAN training, ...')
     training_options.add_argument('--seed', type=int, default=0)
 
-    args = parser.parse_args()
     config = parser.parse_args()
     config = vars(config)
     train(config)
