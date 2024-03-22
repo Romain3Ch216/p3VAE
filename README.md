@@ -1,6 +1,6 @@
 # p3VAE
 
-This repository contains code for the following paper, under review in the International Journal of Computer Vision:
+This repository contains code for the following paper, under review in Springer Machine Learning:
 
 [R. Thoreau, L. Risser, V. Achard, B. Berthelot and X. Briottet, "p3VAE: a physics-integrated generative model. Application to the semantic segmentation of optical remote sensing images", 2022.](https://arxiv.org/abs/2210.10418)
 
@@ -35,7 +35,7 @@ To load and save image patches, use an instance of the `GeoDataset` class in the
 
 ## Feedback
 
-Please send any feedback to romain.thoreau@onera.fr
+Please send any feedback to romain.thoreau@cnes.fr
 
 ## Bibtex citation
 
