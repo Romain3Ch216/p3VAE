@@ -41,13 +41,11 @@ Please send any feedback to romain.thoreau@cnes.fr
 ## Bibtex citation
 
 ```
-@misc{https://doi.org/10.48550/arxiv.2210.10418,
-  doi = {10.48550/ARXIV.2210.10418},
-  url = {https://arxiv.org/abs/2210.10418},
-  author = {Thoreau, Romain and Risser, Laurent and Achard, Véronique and Berthelot, Béatrice and Briottet, Xavier},
-  keywords = {Computer Vision and Pattern Recognition (cs.CV), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences, I.2.6; I.2.10, 68T45},
-  title = {p$^3$VAE: a physics-integrated generative model. Application to the semantic segmentation of optical remote sensing images},
-  publisher = {arXiv},
-  year = {2022}
+@article{thoreau2022p,
+  title={p $\^{} 3$ VAE: a physics-integrated generative model. Application to the pixel-wise classification of airborne hyperspectral images},
+  author={Thoreau, Romain and Risser, Laurent and Achard, V{\'e}ronique and Berthelot, B{\'e}atrice and Briottet, Xavier},
+  journal={arXiv preprint arXiv:2210.10418},
+  year={2022}
 }
+
 ```
