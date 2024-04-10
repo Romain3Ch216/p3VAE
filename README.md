@@ -4,6 +4,8 @@ This repository contains code for the following paper, under review in Springer 
 
 [R. Thoreau, L. Risser, V. Achard, B. Berthelot and X. Briottet, "p3VAE: a physics-integrated generative model. Application to the semantic segmentation of optical remote sensing images", 2022.](https://arxiv.org/abs/2210.10418)
 
+A short version of this work has been accepted as a workshop paper at [Machine Learning for Remote Sensing, ICLR 2024](https://ml-for-rs.github.io/iclr2024/).
+
 Please cite this paper if you use the code in this repository as part of a published research project (see bibtex citation below).
 
 ## Setup
