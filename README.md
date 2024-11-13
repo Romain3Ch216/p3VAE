@@ -3,7 +3,7 @@
 This repository contains code for the following paper, under review in Springer Machine Learning: <br>
 [p3VAE: a physics-integrated generative model. Application to the pixel-wise classification of hyperspectral images](https://arxiv.org/abs/2210.10418)
 
-A short version of this work has been accepted as a workshop paper at [Machine Learning for Remote Sensing, ICLR 2024]([https://ml-for-rs.github.io/iclr2024/](https://ml-for-rs.github.io/iclr2024/camera_ready/papers/17.pdf)).
+A short version of this work has been accepted as a workshop paper at [Machine Learning for Remote Sensing, ICLR 2024](https://ml-for-rs.github.io/iclr2024/camera_ready/papers/17.pdf).
 
 Please cite this paper if you use the code in this repository as part of a published research project (see bibtex citation below).
 
