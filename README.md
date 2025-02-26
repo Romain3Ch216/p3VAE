@@ -1,4 +1,4 @@
-# Physics-informed Variational Autoencoders for Improved Robustness to Environmenral Factors of Variation
+# Physics-informed Variational Autoencoders for Improved Robustness to Environmental Factors of Variation
 
 This repository contains code for the following paper, under review in Springer Machine Learning: <br>
 [Physics-informed Variational Autoencoders for Improved Robustness to Environmental Factors of Variation](https://arxiv.org/abs/2210.10418)
