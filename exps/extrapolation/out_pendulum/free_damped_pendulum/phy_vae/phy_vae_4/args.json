@@ -1,0 +1,69 @@
+{
+    "activation": "elu",
+    "adam_eps": 0.001,
+    "arch_feat": "mlp",
+    "balance_dataug": 0.1,
+    "balance_int_reg": 0.1,
+    "balance_kld": 1.0,
+    "balance_lact_dec": 0.01,
+    "balance_lact_enc": 0.01,
+    "balance_unmix": 0.001,
+    "batch_size": 200,
+    "cuda": false,
+    "datadir": "./data/pendulum/free_damped_pendulum",
+    "dataname_train": "train",
+    "dataname_valid": "valid",
+    "dim_t": 50,
+    "dim_z_add": 1,
+    "dim_z_aux1": 1,
+    "dim_z_aux2": -1,
+    "dt": 0.05,
+    "epochs": 1000,
+    "grad_clip": 5.0,
+    "hidlayers_aux1_dec": [
+        64,
+        64
+    ],
+    "hidlayers_aux1_enc": [
+        64,
+        32
+    ],
+    "hidlayers_aux2_dec": [
+        128,
+        128
+    ],
+    "hidlayers_aux2_enc": [
+        64,
+        32
+    ],
+    "hidlayers_feat": [
+        128,
+        128
+    ],
+    "hidlayers_unmixer": [
+        128,
+        128
+    ],
+    "hidlayers_xi": [
+        64,
+        32
+    ],
+    "intg_lev": 1,
+    "learning_rate": 0.001,
+    "no_phy": false,
+    "num_rnns_feat": 1,
+    "num_units_feat": 256,
+    "num_workers": 0,
+    "ode_solver": "euler",
+    "outdir": "./out_pendulum/free_damped_pendulum/phy_vae_4",
+    "range_xi": [
+        0.0,
+        1.0
+    ],
+    "reg_len_intg": 300,
+    "save_interval": 999999,
+    "seed": 1234567890,
+    "train_size": 1000,
+    "weight_decay": 1e-06,
+    "x_lnvar": -9.0
+}
