@@ -1,4 +1,4 @@
-# p3VAE
+# Physics-informed Variational Autoencoders for Improved Robustness to Environmenral Factors of Variation
 
 This repository contains code for the following paper, under review in Springer Machine Learning: <br>
 [Physics-informed Variational Autoencoders for Improved Robustness to Environmental Factors of Variation](https://arxiv.org/abs/2210.10418)
@@ -27,6 +27,14 @@ To load and save image patches, use an instance of the `GeoDataset` class in the
 
 In order to reproduce the results, you can train the networks by running `exps/classification/train.py` with default arguments.
 
+## Methane plume inversion
+
+<p align="center">
+  <img src="https://github.com/Romain3Ch216/p3VAE/blob/main/methane_inversion.png" alt="Methane inversion">
+</p>
+
+Scripts to run the optimal estimation algorithm and apply p$^3$VAE to the inversion of methane plume from hyperspectral satellite data are in the `exps/inversion` folder.
+
 ## Setup
 
 The code was run using python 3.8:
@@ -36,13 +44,9 @@ The code was run using python 3.8:
 3. navigate to the repository: ```cd p3VAE```
 4. install python requirements: ```pip install -r requirements.txt```
 
-## Loading real data
-
-
-
 ## Feedback
 
-Please send any feedback to romain.thoreau@cnes.fr
+Please send any feedback to romain.thoreau@cnes.fr, or open an issue.
 
 ## Bibtex citation
 
