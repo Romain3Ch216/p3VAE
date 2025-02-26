@@ -7,6 +7,26 @@ A short version of this work has been accepted as a workshop paper at [Machine L
 
 Please cite this paper if you use the code in this repository as part of a published research project (see bibtex citation below).
 
+## Extrapolation of damped pendulum time series
+
+<p align="center">
+  <img src="https://github.com/Romain3Ch216/p3VAE/blob/main/pendulum_extrapolation.png" alt="Pendulum extrapolation">
+</p>
+
+In order to reproduce the results, you can train the networks with the scripts `exps/extrapolation/train.sh` (baselines) and `exps/extrapolation/p3vae_train.sh` (our method).
+
+## Hyperspectral image classification
+
+<p align="center">
+  <img src="https://github.com/Romain3Ch216/p3VAE/blob/main/land_cover_classification.png" alt="Hyperspectral image classification">
+</p>
+
+The airborne hyperspectral images acquired during the CAMCATT-AI4GEO experiment in Toulouse, France are publicly available here: https://camcatt.sedoo.fr/
+
+To load and save image patches, use an instance of the `GeoDataset` class in the `exps/classification/data.py` file.
+
+In order to reproduce the results, you can train the networks by running `exps/classification/train.py` with default arguments.
+
 ## Setup
 
 The code was run using python 3.8:
@@ -16,23 +36,9 @@ The code was run using python 3.8:
 3. navigate to the repository: ```cd p3VAE```
 4. install python requirements: ```pip install -r requirements.txt```
 
-## Reproducing The Results
-
-We provide the data and code that were used to compute results from experiments of section 5.
-The `train.py` script was used to train the models which weights are in the `results` folder. 
-Other files were used to plot the figures of section 5.
-
-For instance, to reproduce the figure 7 of section 5 for the p3VAE with seed 103, run the following script:
-
-```python max_likelihood_estimate.py './results/p3VAE/103'```
-
-The figure will be saved in the './results/p3VAE/Figures` folder.
-
 ## Loading real data
 
-The airborne hyperspectral images acquired during the CAMCATT-AI4GEO experiment in Toulouse, France are publicly available here: https://camcatt.sedoo.fr/
 
-To load and save image patches, use an instance of the `GeoDataset` class in the `data.py` file.
 
 ## Feedback
 
