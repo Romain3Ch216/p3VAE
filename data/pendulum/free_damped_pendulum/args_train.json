@@ -1,0 +1,29 @@
+{
+    "dt": 0.05,
+    "len_episode": 50,
+    "n_samples": 1000,
+    "name": "train",
+    "noise_std": 0.05,
+    "outdir": "./free_damped_pendulum",
+    "range_A": [
+        0.0,
+        0.0
+    ],
+    "range_f": [
+        3.14,
+        6.28
+    ],
+    "range_gamma": [
+        0.0,
+        0.5
+    ],
+    "range_init": [
+        -1.57,
+        1.57
+    ],
+    "range_omega": [
+        0.1,
+        6.28
+    ],
+    "seed": 1234
+}
