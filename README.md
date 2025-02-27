@@ -51,11 +51,13 @@ Please send any feedback to romain.thoreau@cnes.fr, or open an issue.
 ## Bibtex citation
 
 ```
-@article{thoreau2022p,
-  title={p $\^{} 3$ VAE: a physics-integrated generative model. Application to the pixel-wise classification of airborne hyperspectral images},
-  author={Thoreau, Romain and Risser, Laurent and Achard, V{\'e}ronique and Berthelot, B{\'e}atrice and Briottet, Xavier},
-  journal={arXiv preprint arXiv:2210.10418},
-  year={2022}
+@misc{thoreau2025p3vae,
+      title={Physics-informed Variational Autoencoders for Improved Robustness to Environmental Factors of Variation}, 
+      author={Romain Thoreau and Laurent Risser and Véronique Achard and Béatrice Berthelot and Xavier Briottet},
+      year={2025},
+      eprint={2210.10418},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2210.10418}, 
 }
-
 ```
