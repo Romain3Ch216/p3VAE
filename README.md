@@ -46,7 +46,7 @@ The code was run using python 3.8:
 
 ## Feedback
 
-Please send any feedback to romain.thoreau@cnes.fr, or open an issue.
+Please send any feedback to romain.thoreau@agroparistech.fr, or open an issue.
 
 ## Bibtex citation
 
